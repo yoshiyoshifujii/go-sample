@@ -16,7 +16,11 @@ func TestSerializeV1(t *testing.T) {
 
 	b, err := json.Marshal(notifiers)
 	require.NoError(t, err)
-	assert.JSONEq(t, `[{"Address":"user@example.com"},{"Number":"+81000000000"}]`, string(b))
+	assert.JSONEq(t, `[{"type":"email","address":"user@example.com"},{"type":"sms","number":"+81000000000"}]`, string(b))
+
+	got, err := UnmarshalNotifier1List(b)
+	require.NoError(t, err)
+	assert.Equal(t, notifiers, got)
 }
 
 func TestSerializeV2(t *testing.T) {
@@ -27,7 +31,11 @@ func TestSerializeV2(t *testing.T) {
 
 	b, err := json.Marshal(notifiers)
 	require.NoError(t, err)
-	assert.JSONEq(t, `[{"Address":"user@example.com"},{"Number":"+81000000000"}]`, string(b))
+	assert.JSONEq(t, `[{"type":"email","address":"user@example.com"},{"type":"sms","number":"+81000000000"}]`, string(b))
+
+	var got []Notifier2
+	require.NoError(t, json.Unmarshal(b, &got))
+	assert.Equal(t, notifiers, got)
 }
 
 func TestSerializeV3(t *testing.T) {
@@ -38,5 +46,9 @@ func TestSerializeV3(t *testing.T) {
 
 	b, err := json.Marshal(notifiers)
 	require.NoError(t, err)
-	assert.JSONEq(t, `[{"Address":"user@example.com"},{"Number":"+81000000000"}]`, string(b))
+	assert.JSONEq(t, `[{"type":"email","address":"user@example.com"},{"type":"sms","number":"+81000000000"}]`, string(b))
+
+	var got []Notifier3
+	require.NoError(t, json.Unmarshal(b, &got))
+	assert.Equal(t, notifiers, got)
 }
