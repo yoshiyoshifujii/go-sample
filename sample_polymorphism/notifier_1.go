@@ -21,11 +21,3 @@ func (e EmailNotifier1) Notify(message string) string {
 func (s SMSNotifier1) Notify(message string) string {
 	return "SMS to " + s.Number + ": " + message
 }
-
-func BroadcastV1(ns []Notifier1, message string) []string {
-	out := make([]string, 0, len(ns))
-	for _, n := range ns {
-		out = append(out, n.Notify(message))
-	}
-	return out
-}

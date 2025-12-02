@@ -116,6 +116,29 @@ func fromPayloadsV3(raw []notifierPayload) ([]Notifier3, error) {
 	})
 }
 
+// V4
+func toPayloadsV4(ns []Notifier4) ([]notifierPayload, error) {
+	return toPayloads(ns, func(n Notifier4) (notifierPayload, error) {
+		if n.payload.Type == "" {
+			return notifierPayload{}, fmt.Errorf("unknown notifier4 payload type (empty)")
+		}
+		return n.payload, nil
+	})
+}
+
+func fromPayloadsV4(raw []notifierPayload) ([]Notifier4, error) {
+	return fromPayloads(raw, func(p notifierPayload) (Notifier4, error) {
+		switch p.Type {
+		case "email":
+			return NewEmailNotifier4(p.Address), nil
+		case "sms":
+			return NewSMSNotifier4(p.Number), nil
+		default:
+			return Notifier4{}, fmt.Errorf("unknown notifier4 payload type %q", p.Type)
+		}
+	})
+}
+
 // Helpers for tests (serialize/deserialize lists)
 func marshalPayloads(payloads []notifierPayload) ([]byte, error) {
 	return json.Marshal(payloads)

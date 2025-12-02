@@ -66,3 +66,26 @@ func TestSerializeV3(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, notifiers, got)
 }
+
+func TestSerializeV4(t *testing.T) {
+	notifiers := []Notifier4{
+		NewEmailNotifier4("user@example.com"),
+		NewSMSNotifier4("+81000000000"),
+	}
+
+	payloads, err := toPayloadsV4(notifiers)
+	require.NoError(t, err)
+
+	b, err := marshalPayloads(payloads)
+	require.NoError(t, err)
+	assert.JSONEq(t, `[{"type":"email","address":"user@example.com"},{"type":"sms","number":"+81000000000"}]`, string(b))
+
+	decoded, err := unmarshalPayloads(b)
+	require.NoError(t, err)
+	got, err := fromPayloadsV4(decoded)
+	require.NoError(t, err)
+
+	roundTripPayloads, err := toPayloadsV4(got)
+	require.NoError(t, err)
+	assert.Equal(t, payloads, roundTripPayloads)
+}

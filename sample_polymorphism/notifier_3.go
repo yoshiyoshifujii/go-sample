@@ -87,12 +87,3 @@ func (e *EmailNotifier3) Notify(message string) string {
 func (s *SMSNotifier3) Notify(message string) string {
 	return "SMS to " + s.Number + ": " + message
 }
-
-// BroadcastV3 sends using tag-based dispatch.
-func BroadcastV3(ns []Notifier3, message string) []string {
-	out := make([]string, 0, len(ns))
-	for _, n := range ns {
-		out = append(out, n.Notify(message))
-	}
-	return out
-}
