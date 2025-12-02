@@ -1,5 +1,7 @@
 package main
 
+import "encoding/json"
+
 type (
 	notifierType string
 )
@@ -41,22 +43,56 @@ func NewSMSNotifier3(number string) Notifier3 {
 	}
 }
 
-// Notify dispatches the notification based on the stored type.
-func (n Notifier3) Notify(message string) string {
+// dispatchNotifier3 runs the provided callback based on the notifier type.
+func dispatchNotifier3[T any](
+	n Notifier3,
+	email func(*EmailNotifier3) (T, error),
+	sms func(*SMSNotifier3) (T, error),
+) (T, error) {
 	switch n.notifierType {
 	case notifierTypeEmail:
 		if n.emailNotifier == nil {
-			return "Email notifier missing backend"
+			panic("email notifier missing backend")
 		}
-		return n.emailNotifier.Notify(message)
+		return email(n.emailNotifier)
 	case notifierTypeSMS:
 		if n.smsNotifier == nil {
-			return "SMS notifier missing backend"
+			panic("sms notifier missing backend")
 		}
-		return n.smsNotifier.Notify(message)
+		return sms(n.smsNotifier)
 	default:
-		return "Unknown notifier"
+		panic("unknown notifier type: " + string(n.notifierType))
 	}
+}
+
+// Notify dispatches the notification based on the stored type.
+func (n Notifier3) Notify(message string) string {
+	res, err := dispatchNotifier3(
+		n,
+		func(e *EmailNotifier3) (string, error) {
+			return e.Notify(message), nil
+		},
+		func(s *SMSNotifier3) (string, error) {
+			return s.Notify(message), nil
+		},
+	)
+	if err != nil {
+		panic(err)
+	}
+	return res
+}
+
+// MarshalJSON keeps serialized output aligned with concrete backend fields.
+func (n Notifier3) MarshalJSON() ([]byte, error) {
+	return dispatchNotifier3(
+		n,
+		func(e *EmailNotifier3) ([]byte, error) {
+			return json.Marshal(e)
+		},
+		func(s *SMSNotifier3) ([]byte, error) {
+			return json.Marshal(s)
+		},
+	)
 }
 
 func (e *EmailNotifier3) Notify(message string) string {

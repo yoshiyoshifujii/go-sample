@@ -1,5 +1,7 @@
 package main
 
+import "encoding/json"
+
 // Version 2: channel interfaceをフィールドに埋め込み、ポインタ実装を隠蔽.
 
 type (
@@ -30,6 +32,22 @@ func (n Notifier2) Notify(message string) string {
 		return "Notifier channel missing backend"
 	}
 	return n.ch.Send(message)
+}
+
+// MarshalJSON ensures the serialized form matches the concrete backend fields.
+func (n Notifier2) MarshalJSON() ([]byte, error) {
+	switch v := n.ch.(type) {
+	case *EmailNotifier2:
+		return json.Marshal(struct {
+			Address string
+		}{Address: v.Address})
+	case *SMSNotifier2:
+		return json.Marshal(struct {
+			Number string
+		}{Number: v.Number})
+	default:
+		return json.Marshal(struct{}{})
+	}
 }
 
 func (e *EmailNotifier2) Send(message string) string {

@@ -27,7 +27,7 @@ func TestSerializeV2(t *testing.T) {
 
 	b, err := json.Marshal(notifiers)
 	require.NoError(t, err)
-	assert.Equal(t, `[{},{}]`, string(b)) // chは非公開フィールドのためシリアライズ対象外
+	assert.JSONEq(t, `[{"Address":"user@example.com"},{"Number":"+81000000000"}]`, string(b))
 }
 
 func TestSerializeV3(t *testing.T) {
@@ -38,5 +38,5 @@ func TestSerializeV3(t *testing.T) {
 
 	b, err := json.Marshal(notifiers)
 	require.NoError(t, err)
-	assert.Equal(t, `[{},{}]`, string(b)) // タグやフィールドが非公開のため空オブジェクトになる
+	assert.JSONEq(t, `[{"Address":"user@example.com"},{"Number":"+81000000000"}]`, string(b))
 }
