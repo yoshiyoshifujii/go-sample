@@ -27,3 +27,6 @@
 - Scope commits narrowly (one feature/fix per commit) to keep history clean.
 - Pull requests should include: a short summary of the change, any testing performed (`go test ./...` output is enough), and links to related issues or context.
 - If the change affects runtime behavior of a sample, note how to run it (e.g., `go run ./sample_context`) and any expected output.
+
+## Communication
+- 日本語でのコミュニケーション歓迎です。PR やコメントも日本語で問題ありません。
