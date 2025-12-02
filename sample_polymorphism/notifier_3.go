@@ -1,7 +1,5 @@
 package main
 
-import "encoding/json"
-
 type (
 	notifierType string
 )
@@ -80,56 +78,6 @@ func (n Notifier3) Notify(message string) string {
 		panic(err)
 	}
 	return res
-}
-
-// MarshalJSON keeps serialized output aligned with concrete backend fields.
-func (n Notifier3) MarshalJSON() ([]byte, error) {
-	return dispatchNotifier3(
-		n,
-		func(e *EmailNotifier3) ([]byte, error) {
-			return json.Marshal(struct {
-				Type    notifierType `json:"type"`
-				Address string       `json:"address"`
-			}{Type: notifierTypeEmail, Address: e.Address})
-		},
-		func(s *SMSNotifier3) ([]byte, error) {
-			return json.Marshal(struct {
-				Type   notifierType `json:"type"`
-				Number string       `json:"number"`
-			}{Type: notifierTypeSMS, Number: s.Number})
-		},
-	)
-}
-
-// UnmarshalJSON reconstructs the tagged notifier.
-func (n *Notifier3) UnmarshalJSON(data []byte) error {
-	var raw struct {
-		Type    notifierType `json:"type"`
-		Address string       `json:"address,omitempty"`
-		Number  string       `json:"number,omitempty"`
-	}
-	if err := json.Unmarshal(data, &raw); err != nil {
-		return err
-	}
-	switch raw.Type {
-	case notifierTypeEmail:
-		if raw.Address == "" {
-			panic("email notifier missing address")
-		}
-		n.notifierType = notifierTypeEmail
-		n.emailNotifier = &EmailNotifier3{Address: raw.Address}
-		n.smsNotifier = nil
-	case notifierTypeSMS:
-		if raw.Number == "" {
-			panic("sms notifier missing number")
-		}
-		n.notifierType = notifierTypeSMS
-		n.emailNotifier = nil
-		n.smsNotifier = &SMSNotifier3{Number: raw.Number}
-	default:
-		panic("unknown notifier payload")
-	}
-	return nil
 }
 
 func (e *EmailNotifier3) Notify(message string) string {

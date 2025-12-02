@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -14,11 +13,16 @@ func TestSerializeV1(t *testing.T) {
 		SMSNotifier1{Number: "+81000000000"},
 	}
 
-	b, err := json.Marshal(notifiers)
+	payloads, err := toPayloadsV1(notifiers)
+	require.NoError(t, err)
+
+	b, err := marshalPayloads(payloads)
 	require.NoError(t, err)
 	assert.JSONEq(t, `[{"type":"email","address":"user@example.com"},{"type":"sms","number":"+81000000000"}]`, string(b))
 
-	got, err := UnmarshalNotifier1List(b)
+	decoded, err := unmarshalPayloads(b)
+	require.NoError(t, err)
+	got, err := fromPayloadsV1(decoded)
 	require.NoError(t, err)
 	assert.Equal(t, notifiers, got)
 }
@@ -29,12 +33,17 @@ func TestSerializeV2(t *testing.T) {
 		NewSMSNotifier2("+81000000000"),
 	}
 
-	b, err := json.Marshal(notifiers)
+	payloads, err := toPayloadsV2(notifiers)
+	require.NoError(t, err)
+
+	b, err := marshalPayloads(payloads)
 	require.NoError(t, err)
 	assert.JSONEq(t, `[{"type":"email","address":"user@example.com"},{"type":"sms","number":"+81000000000"}]`, string(b))
 
-	var got []Notifier2
-	require.NoError(t, json.Unmarshal(b, &got))
+	decoded, err := unmarshalPayloads(b)
+	require.NoError(t, err)
+	got, err := fromPayloadsV2(decoded)
+	require.NoError(t, err)
 	assert.Equal(t, notifiers, got)
 }
 
@@ -44,11 +53,16 @@ func TestSerializeV3(t *testing.T) {
 		NewSMSNotifier3("+81000000000"),
 	}
 
-	b, err := json.Marshal(notifiers)
+	payloads, err := toPayloadsV3(notifiers)
+	require.NoError(t, err)
+
+	b, err := marshalPayloads(payloads)
 	require.NoError(t, err)
 	assert.JSONEq(t, `[{"type":"email","address":"user@example.com"},{"type":"sms","number":"+81000000000"}]`, string(b))
 
-	var got []Notifier3
-	require.NoError(t, json.Unmarshal(b, &got))
+	decoded, err := unmarshalPayloads(b)
+	require.NoError(t, err)
+	got, err := fromPayloadsV3(decoded)
+	require.NoError(t, err)
 	assert.Equal(t, notifiers, got)
 }

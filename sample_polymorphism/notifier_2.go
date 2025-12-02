@@ -1,7 +1,5 @@
 package main
 
-import "encoding/json"
-
 // Version 2: channel interfaceをフィールドに埋め込み、ポインタ実装を隠蔽.
 
 type (
@@ -19,11 +17,6 @@ type (
 	}
 )
 
-const (
-	notifier2TypeEmail = "email"
-	notifier2TypeSMS   = "sms"
-)
-
 func NewEmailNotifier2(address string) Notifier2 {
 	return Notifier2{ch: &EmailNotifier2{Address: address}}
 }
@@ -37,24 +30,6 @@ func (n Notifier2) Notify(message string) string {
 		return "Notifier channel missing backend"
 	}
 	return n.ch.Send(message)
-}
-
-// MarshalJSON ensures the serialized form matches the concrete backend fields.
-func (n Notifier2) MarshalJSON() ([]byte, error) {
-	switch v := n.ch.(type) {
-	case *EmailNotifier2:
-		return json.Marshal(struct {
-			Type    string `json:"type"`
-			Address string `json:"address"`
-		}{Type: notifier2TypeEmail, Address: v.Address})
-	case *SMSNotifier2:
-		return json.Marshal(struct {
-			Type   string `json:"type"`
-			Number string `json:"number"`
-		}{Type: notifier2TypeSMS, Number: v.Number})
-	default:
-		return json.Marshal(struct{}{})
-	}
 }
 
 func (e *EmailNotifier2) Send(message string) string {
@@ -71,25 +46,4 @@ func BroadcastV2(ns []Notifier2, message string) []string {
 		out = append(out, n.Notify(message))
 	}
 	return out
-}
-
-// UnmarshalJSON reconstructs the backend from serialized fields.
-func (n *Notifier2) UnmarshalJSON(data []byte) error {
-	var raw struct {
-		Type    string `json:"type"`
-		Address string `json:"address,omitempty"`
-		Number  string `json:"number,omitempty"`
-	}
-	if err := json.Unmarshal(data, &raw); err != nil {
-		return err
-	}
-	switch raw.Type {
-	case notifier2TypeEmail:
-		n.ch = &EmailNotifier2{Address: raw.Address}
-	case notifier2TypeSMS:
-		n.ch = &SMSNotifier2{Number: raw.Number}
-	default:
-		n.ch = nil
-	}
-	return nil
 }
