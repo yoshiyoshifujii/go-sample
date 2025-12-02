@@ -1,7 +1,7 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-- Root `go.mod` declares module `github.com/yoshiyoshifujii/go-sample` targeting Go 1.23.4; dependencies live in `go.sum`.
+- Root `go.mod` declares module `github.com/yoshiyoshifujii/go-sample` targeting Go 1.25.4; dependencies live in `go.sum`.
 - Each `sample_*` folder (`sample_context`, `sample_di`, `sample_enum`, `sample_enum2`, `sample_interface`, `sample_override`) is a self-contained `main` package demonstrating a pattern; run them individually.
 - Tests currently reside in `sample_di/main_test.go` using `testify/assert`; add new tests alongside the code they cover.
 
